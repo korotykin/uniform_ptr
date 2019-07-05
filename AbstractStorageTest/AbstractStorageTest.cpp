@@ -1,22 +1,36 @@
 #include <iostream>
+#include <variant>
 
 class StoredInt {
 public:
-	StoredInt(const int val): mValue(val)
-	{}
+	explicit StoredInt(const int val): mValue(val) {}
+	explicit StoredInt(int * const val) : mValue(val) {}
 public:
-	int AddVal(const int val)
+	int AddVal(const int val) const
 	{
-		return mValue + val;
+		return *get() + val;
 	}
 private:
-	int mValue = 0;
+	std::variant<int, int *> mValue;
+	const int * get() const
+	{
+		switch (mValue.index()) {
+		case 0:
+			return &std::get<0>(mValue);
+			break;
+		case 1:
+			return std::get<1>(mValue);
+			break;
+		}
+	}
 };
 
 int main()
 {
-	StoredInt v(3);
-    std::cout << v.AddVal(2) << std::endl;
+	StoredInt v1{ 3 };
+	int b = 4;
+	StoredInt v2{ &b };
+    std::cout << "::: " << v1.AddVal(2) << " ::: " << v2.AddVal(7) << std::endl;
 	return 0;
 }
 
