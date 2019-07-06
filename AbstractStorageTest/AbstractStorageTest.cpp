@@ -75,12 +75,12 @@ private:
 
 int main()
 {
-	Storage<int> v1{ 3 };
 	int b = 4;
-	Storage<int> v2{ &b };
 	Storage<int> v3{ std::make_shared<int>(8) };
-    std::cout << "::: " << (*v1 + 2) << " ::: " << (*v2 + 7) << " ::: " << (*v3 + 12) <<
-		std::endl << " ::: " << (*Storage<int>(std::make_unique<int>(9)) + 20) << std::endl;
+	std::cout << "::: " << (*Storage<int>{ 3 } +2) << std::endl
+		<< " ::: " << (*Storage<int>{ &b } +7) << std::endl
+		<< " ::: " << (*Storage<int>{ std::make_shared<int>(8)} +12) << std::endl
+		<< " ::: " << (*Storage<int>{std::make_unique<int>(9)} +20) << std::endl;
 	return 0;
 }
 
