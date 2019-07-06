@@ -1,28 +1,45 @@
 #include <iostream>
 #include <variant>
+#include <memory>
 
 class StoredInt {
 public:
 	explicit StoredInt(const int val): mValue(val) {}
 	explicit StoredInt(int * const val) : mValue(val) {}
+	explicit StoredInt(std::shared_ptr<int> val) : mValue(val) {}
 public:
-	int AddVal(const int val) const
+	int & operator*()
 	{
-		return *get() + val;
+		if (auto pval = std::get_if<int>(&mValue))
+		{
+			return *pval;
+		}
+		else if (auto pval = std::get_if<int*>(&mValue))
+		{
+			return **pval;
+		}
+		else if (auto pval = std::get_if < std::shared_ptr<int>>(&mValue))
+		{
+			return **pval;
+		};
+	}
+	const int & operator*() const
+	{
+		if (auto pval = std::get_if<int>(&mValue))
+		{
+			return *pval;
+		}
+		else if (auto pval = std::get_if<int*>(&mValue))
+		{
+			return **pval;
+		}
+		else if (auto pval = std::get_if < std::shared_ptr<int>>(&mValue))
+		{
+			return **pval;
+		};
 	}
 private:
-	std::variant<int, int *> mValue;
-	const int * get() const
-	{
-		switch (mValue.index()) {
-		case 0:
-			return &std::get<0>(mValue);
-			break;
-		case 1:
-			return std::get<1>(mValue);
-			break;
-		}
-	}
+	std::variant<int, int *, std::shared_ptr<int> > mValue;
 };
 
 int main()
@@ -30,7 +47,8 @@ int main()
 	StoredInt v1{ 3 };
 	int b = 4;
 	StoredInt v2{ &b };
-    std::cout << "::: " << v1.AddVal(2) << " ::: " << v2.AddVal(7) << std::endl;
+	StoredInt v3{ std::make_shared<int>(8) };
+    std::cout << "::: " << (*v1 + 2) << " ::: " << (*v2 + 7) << " ::: " << (*v3 + 12) << std::endl;
 	return 0;
 }
 
