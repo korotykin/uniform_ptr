@@ -9,6 +9,7 @@ public:
 	explicit Storage(T && val) : mValue(std::move(val)) {}
 	explicit Storage(T * const val) : mValue(val) {}
 	explicit Storage(std::shared_ptr<T> val) : mValue(val) {}
+	explicit Storage(std::unique_ptr<T> val) : mValue(std::move(val)) {} // using std::move to resolve issue
 public:
 	T & operator*()
 	{
@@ -21,6 +22,10 @@ public:
 			return **pval;
 		}
 		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
+		{
+			return **pval;
+		}
+		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
 		{
 			return **pval;
 		};
@@ -38,10 +43,14 @@ public:
 		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
 		{
 			return **pval;
+		}
+		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
+		{
+			return **pval;
 		};
 	}
 private:
-	std::variant<T, T *, std::shared_ptr<T> > mValue;
+	std::variant<T, T *, std::shared_ptr<T>, std::unique_ptr<T> > mValue;
 };
 
 int main()
@@ -50,7 +59,8 @@ int main()
 	int b = 4;
 	Storage<int> v2{ &b };
 	Storage<int> v3{ std::make_shared<int>(8) };
-    std::cout << "::: " << (*v1 + 2) << " ::: " << (*v2 + 7) << " ::: " << (*v3 + 12) << std::endl;
+    std::cout << "::: " << (*v1 + 2) << " ::: " << (*v2 + 7) << " ::: " << (*v3 + 12) <<
+		std::endl << " ::: " << (*Storage<int>(std::make_unique<int>(9)) + 20) << std::endl;
 	return 0;
 }
 
