@@ -1,13 +1,59 @@
-#include <iostream>
 #include "../uniform_ptr.hpp"
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <memory>
+
+class Outputer
+{
+public:
+	Outputer & add_stream(uniform_ptr<std::ostream> && a_ostream);
+	template <typename T>
+	Outputer & operator<<(const T & val);
+private:
+	std::vector<uniform_ptr<std::ostream> > m_ostrs;
+};
 
 int main()
 {
-	int b = 4;
-	std::cout << "::: " << (*uniform_ptr<int>{ 3 } +2) << std::endl
-		<< " ::: " << (*uniform_ptr<int>{ &b } +7) << std::endl
-		<< " ::: " << (*uniform_ptr<int>{ std::make_shared<int>(8)} +12) << std::endl
-		<< " ::: " << (*uniform_ptr<int>{std::make_unique<int>(9)} +20) << std::endl;
+	Outputer outter;
+	outter.add_stream(&std::cout);
+	outter.add_stream(std::make_shared<std::ofstream>("local2.txt", std::ios::trunc));
+	outter.add_stream(std::make_unique<std::ofstream>("local1.txt"));
+	outter << "Hello world!\n";
+
 	return 0;
 }
+
+Outputer & Outputer::add_stream(uniform_ptr<std::ostream> && a_ostream)
+{
+	m_ostrs.emplace_back(std::move(a_ostream));
+	return *this;
+}
+
+template <typename T>
+Outputer & Outputer::operator<<(const T & val)
+{
+	for (auto & ostr : m_ostrs)
+	{
+		if (bool(ostr) == true)
+		{
+			if (ostr->fail() != true)
+			{
+				*ostr << val;
+			}
+			else
+			{
+				std::cerr << "invalid stream" << std::endl;
+			}
+		}
+		else
+		{
+			std::cerr << "failed to out value" << std::endl;
+		}
+	}
+	return *this;
+}
+
 

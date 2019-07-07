@@ -8,12 +8,27 @@
 template<typename T>
 class uniform_ptr {
 public:
-	explicit uniform_ptr(const T & val) : mValue(val) {}
-	explicit uniform_ptr(T && val) : mValue(std::move(val)) {}
-	explicit uniform_ptr(T * const val) : mValue(val) {}
-	explicit uniform_ptr(std::shared_ptr<T> val) : mValue(val) {}
-	explicit uniform_ptr(std::unique_ptr<T> val) : mValue(std::move(val)) {} // using std::move to resolve issue
+	uniform_ptr() : mValue(nullptr) {}
+	uniform_ptr(T * const val) : mValue(val) {}
+	uniform_ptr(std::shared_ptr<T> val) : mValue(val) {}
+	uniform_ptr(std::unique_ptr<T> val) : mValue(std::move(val)) {}
+	template<typename C>
+	uniform_ptr(C * const val) : mValue((T*)val) {}
+	template <typename C>
+	uniform_ptr(std::shared_ptr<C> val) : mValue(val) {}
+	template <typename C>
+	uniform_ptr(std::unique_ptr<C> val) : mValue(std::move(std::unique_ptr<T>(std::move(val)))) {}
+
+	uniform_ptr(const uniform_ptr<T> & lhv) = delete;
+	uniform_ptr(uniform_ptr<T> && lhv) noexcept : mValue(std::move(lhv.mValue)) {}
+	uniform_ptr<T> & operator=(const uniform_ptr<T> & lhv) = delete;
+	uniform_ptr<T> & operator=(uniform_ptr<T> && lhv) noexcept
+	{
+		mValue = std::move(lhv.mValue);
+	}
+	~uniform_ptr() = default;
 public:
+	operator bool() const { return getPointer() != nullptr; }
 	T & operator*()
 	{
 		return *getPointer();
@@ -31,13 +46,13 @@ public:
 		return getPointer();
 	}
 private:
-	std::variant<T, T *, std::shared_ptr<T>, std::unique_ptr<T> > mValue;
+	std::variant<nullptr_t, T *, std::shared_ptr<T>, std::unique_ptr<T> > mValue;
 
 	T * getPointer()
 	{
-		if (auto pval = std::get_if<T>(&mValue))
+		if (auto pval = std::get_if<nullptr_t>(&mValue))
 		{
-			return pval;
+			return *pval;
 		}
 		else if (auto pval = std::get_if<T*>(&mValue))
 		{
@@ -55,9 +70,9 @@ private:
 	}
 	const T * getPointer() const
 	{
-		if (auto pval = std::get_if<T>(&mValue))
+		if (auto pval = std::get_if<nullptr_t>(&mValue))
 		{
-			return pval;
+			return *pval;
 		}
 		else if (auto pval = std::get_if<T*>(&mValue))
 		{
