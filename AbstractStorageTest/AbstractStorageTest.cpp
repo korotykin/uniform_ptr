@@ -3,13 +3,13 @@
 #include <memory>
 
 template<typename T>
-class Storage {
+class uniform_ptr {
 public:
-	explicit Storage(const T & val): mValue(val) {}
-	explicit Storage(T && val) : mValue(std::move(val)) {}
-	explicit Storage(T * const val) : mValue(val) {}
-	explicit Storage(std::shared_ptr<T> val) : mValue(val) {}
-	explicit Storage(std::unique_ptr<T> val) : mValue(std::move(val)) {} // using std::move to resolve issue
+	explicit uniform_ptr(const T & val): mValue(val) {}
+	explicit uniform_ptr(T && val) : mValue(std::move(val)) {}
+	explicit uniform_ptr(T * const val) : mValue(val) {}
+	explicit uniform_ptr(std::shared_ptr<T> val) : mValue(val) {}
+	explicit uniform_ptr(std::unique_ptr<T> val) : mValue(std::move(val)) {} // using std::move to resolve issue
 public:
 	T & operator*()
 	{
@@ -76,11 +76,10 @@ private:
 int main()
 {
 	int b = 4;
-	Storage<int> v3{ std::make_shared<int>(8) };
-	std::cout << "::: " << (*Storage<int>{ 3 } +2) << std::endl
-		<< " ::: " << (*Storage<int>{ &b } +7) << std::endl
-		<< " ::: " << (*Storage<int>{ std::make_shared<int>(8)} +12) << std::endl
-		<< " ::: " << (*Storage<int>{std::make_unique<int>(9)} +20) << std::endl;
+	std::cout << "::: " << (*uniform_ptr<int>{ 3 } +2) << std::endl
+		<< " ::: " << (*uniform_ptr<int>{ &b } +7) << std::endl
+		<< " ::: " << (*uniform_ptr<int>{ std::make_shared<int>(8)} +12) << std::endl
+		<< " ::: " << (*uniform_ptr<int>{std::make_unique<int>(9)} +20) << std::endl;
 	return 0;
 }
 
