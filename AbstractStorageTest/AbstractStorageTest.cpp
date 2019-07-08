@@ -21,6 +21,7 @@ int main()
 	outter.add_stream(&std::cout);
 	outter.add_stream(std::make_shared<std::ofstream>("local2.txt", std::ios::trunc));
 	outter.add_stream(std::make_unique<std::fstream>("local1.txt", std::ios::out));
+	outter.add_stream(std::move(std::fstream("local3.txt", std::ios::out | std::ios::ate)));
 	outter << "Hello world!\n";
 
 	return 0;
