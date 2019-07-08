@@ -20,7 +20,7 @@ int main()
 	Outputer outter;
 	outter.add_stream(&std::cout);
 	outter.add_stream(std::make_shared<std::ofstream>("local2.txt", std::ios::trunc));
-	outter.add_stream(std::make_unique<std::ofstream>("local1.txt"));
+	outter.add_stream(std::make_unique<std::fstream>("local1.txt", std::ios::out));
 	outter << "Hello world!\n";
 
 	return 0;
