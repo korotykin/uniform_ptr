@@ -9,14 +9,14 @@ template<typename T>
 class uniform_ptr {
 public:
 	uniform_ptr() : mValue(nullptr) {}
-	uniform_ptr(T val) : mValue(std::make_unique<T>(std::move(val))) {}
+	uniform_ptr(const T & val) : mValue(std::make_unique<T>(val)) {}
 	uniform_ptr(T && val) : mValue(std::make_unique<T>(std::move(val))) {}
 	uniform_ptr(T * const val) : mValue(val) {}
 	uniform_ptr(std::shared_ptr<T> val) : mValue(val) {}
 	uniform_ptr(std::unique_ptr<T> val) : mValue(std::move(val)) {}
 
-	//template<typename C>
-	//uniform_ptr(C val) : mValue(std::unique_ptr<T>(std::make_unique<C>(std::move(val)))) {}
+	template<typename C>
+	uniform_ptr(const C & val) : mValue(std::unique_ptr<T>(std::make_unique<C>(val))) {}
 	template<typename C>
 	uniform_ptr(C && val) : mValue(std::unique_ptr<T>(std::make_unique<C>(std::move(val)))) {}
 	template<typename C>
