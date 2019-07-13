@@ -14,19 +14,26 @@ public:
 	template<typename U = T, std::enable_if_t<std::is_copy_constructible_v<U>, int> = 0 >
 	uniform_ptr(const U & val) : mValue(std::unique_ptr<T>(std::make_unique<U>(val))) {}
 
-	template<typename U = T, std::enable_if_t<std::is_move_constructible_v<U>, int> = 0>
-	uniform_ptr(U && val) : mValue(std::unique_ptr<T>(std::make_unique<U>(std::move(val)))) {}
+	template<typename U = T, std::enable_if_t<std::is_move_constructible_v<U> && !std::is_reference_v<U>, int> = 0>
+	uniform_ptr(U && val) : mValue(std::unique_ptr<T>(std::make_unique<U>(std::forward<U>(val))))
+	{
+		static_assert(std::is_convertible_v<U*, T*>);
+	}
 
-	template<typename U = T>
+	template<typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
 	uniform_ptr(U * const val) : mValue(val) {}
 
-	uniform_ptr(std::shared_ptr<T> val) : mValue(val) {}
-	uniform_ptr(std::unique_ptr<T> val) : mValue(std::move(val)) {}
+	template <typename U = T>
+	uniform_ptr(std::shared_ptr<U> val) : mValue(val)
+	{
+		static_assert(std::is_convertible_v<U*, T*>);
+	}
 
-	template <typename C>
-	uniform_ptr(std::shared_ptr<C> val) : mValue(val) {}
-	template <typename C>
-	uniform_ptr(std::unique_ptr<C> val) : mValue(std::move(std::unique_ptr<T>(std::move(val)))) {}
+	template <typename U = T>
+	uniform_ptr(std::unique_ptr<U> val) : mValue(std::move(std::unique_ptr<T>(std::move(val))))
+	{
+		static_assert(std::is_convertible_v<U*, T*>);
+	}
 
 	uniform_ptr(const uniform_ptr<T> & lhv) = delete;
 	uniform_ptr(uniform_ptr<T> && lhv) noexcept : mValue(std::move(lhv.mValue)) {}

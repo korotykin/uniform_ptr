@@ -46,6 +46,9 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 {
 	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
 	BOOST_CHECK(1 == *uniform_ptr<int>{1});
+	int b = 2;
+	BOOST_CHECK(2 == *uniform_ptr<int>{b});
+	++b; // just to say compiler do not move varible in previous line
 	static_assert(!std::is_move_constructible_v<IntNonMovable>);
 	BOOST_CHECK(2 == uniform_ptr<IntNonMovable>(IntNonMovable(2))->get()); // copying value
 	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);
