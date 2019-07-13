@@ -44,11 +44,13 @@ private:
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 {
+	// checking with POD type = int
 	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
-	BOOST_CHECK(1 == *uniform_ptr<int>{1});
+	BOOST_CHECK(1 == *uniform_ptr<int>{1}); // value is moved
 	int b = 2;
-	BOOST_CHECK(2 == *uniform_ptr<int>{b});
-	++b; // just to say compiler do not move varible in previous line
+	BOOST_CHECK(2 == *uniform_ptr<int>{b}); // value is copyed
+	BOOST_CHECK(2 == *uniform_ptr<int>{&b}); // saving a pointer
+
 	static_assert(!std::is_move_constructible_v<IntNonMovable>);
 	BOOST_CHECK(2 == uniform_ptr<IntNonMovable>(IntNonMovable(2))->get()); // copying value
 	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);

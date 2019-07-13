@@ -23,7 +23,7 @@ int main()
 	outter.add_stream(std::make_unique<std::fstream>("local1.txt", std::ios::out));
 	outter.add_stream(std::ofstream("local3.txt", std::ios::out | std::ios::ate));
 	std::fstream file4("local4.txt", std::ios::out | std::ios::ate);
-	outter.add_stream(std::move(file4));
+	outter.add_stream(std::move(file4)); // explicit using move because fstream is not copyable
 	outter << "Hello world!\n";
 
 	return 0;
