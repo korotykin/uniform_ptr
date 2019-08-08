@@ -44,10 +44,16 @@ private:
 	int m_value = 0;
 };
 
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor)
+{
+	BOOST_CHECK(nullptr == uniform_ptr<char>{}.get());
+	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
+
+}
+
 BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 {
 	// checking with POD type = int
-	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
 	BOOST_CHECK(1 == *uniform_ptr<int>{1}); // value is moved
 	int b = 2;
 	BOOST_CHECK(2 == *uniform_ptr<int>{b}); // value is copyed
