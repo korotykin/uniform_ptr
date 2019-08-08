@@ -9,7 +9,7 @@
 template<typename T>
 class uniform_ptr {
 public:
-	uniform_ptr() : mValue(nullptr) {}
+	uniform_ptr(nullptr_t = nullptr) : mValue(nullptr) {}
 
 	template<typename U = T, std::enable_if_t<std::is_copy_constructible_v<U>, int> = 0 >
 	uniform_ptr(const U & val) : mValue(std::unique_ptr<T>(std::make_unique<U>(val))) {}
