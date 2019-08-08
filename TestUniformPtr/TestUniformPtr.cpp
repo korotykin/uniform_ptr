@@ -61,6 +61,16 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_nullptr_ctor)
 	BOOST_CHECK(nullptr == uniform_ptr<IntNonCopyable>{nullptr}.get());
 }
 
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_ctor)
+{
+	const char A = 'A'; // it disallows using move ctor
+	BOOST_CHECK(A == *uniform_ptr<char>{A});
+	const bool T = true;
+	BOOST_CHECK(*uniform_ptr<bool>{T});
+	const long long V = 3;
+	BOOST_CHECK(V == *uniform_ptr<long long>{V});
+}
+
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
 {
 	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
