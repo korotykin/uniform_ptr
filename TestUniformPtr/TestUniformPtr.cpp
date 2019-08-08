@@ -12,6 +12,7 @@ public:
 	virtual int get() const = 0;
 };
 
+// Copy ctor disabled. Move ctor enabled
 class IntNonCopyable final: public IntValue {
 public:
 	IntNonCopyable() = delete;
@@ -27,6 +28,7 @@ private:
 	int m_value = 0;
 };
 
+// Move ctor disabled. Copy ctor enabled
 class IntNonMovable final: public IntValue {
 public:
 	IntNonMovable() = delete;
@@ -52,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 	BOOST_CHECK(2 == *uniform_ptr<int>{&b}); // saving a pointer to value
 	const int c = 3;
 	BOOST_CHECK(3 == *uniform_ptr<int>{c}); // ok cause the value is copyed
-	//BOOST_CHECK(3 == *uniform_ptr<int>{&c}); // is not compiled
+	//BOOST_CHECK(3 == *uniform_ptr<int>{&c}); // is not compiled - const int != int
 	BOOST_CHECK(3 == *uniform_ptr<const int>{ c });
 
 	// checking with objects
