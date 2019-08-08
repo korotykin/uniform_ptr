@@ -6,6 +6,7 @@
 
 #include "../uniform_ptr.hpp"
 
+// used as base class
 class IntValue {
 public:
 	virtual ~IntValue() {}
@@ -44,11 +45,34 @@ private:
 	int m_value = 0;
 };
 
-BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor)
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_default_ctor)
 {
 	BOOST_CHECK(nullptr == uniform_ptr<char>{}.get());
-	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
+	BOOST_CHECK(nullptr == uniform_ptr<IntValue>{}.get());
+	BOOST_CHECK(nullptr == uniform_ptr<IntNonMovable>{}.get());
+	BOOST_CHECK(nullptr == uniform_ptr<IntNonCopyable>{}.get());
+}
 
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_nullptr_ctor)
+{
+	BOOST_CHECK(nullptr == uniform_ptr<char>{nullptr}.get());
+	BOOST_CHECK(nullptr == uniform_ptr<IntValue>{nullptr}.get());
+	BOOST_CHECK(nullptr == uniform_ptr<IntNonMovable>{nullptr}.get());
+	BOOST_CHECK(nullptr == uniform_ptr<IntNonCopyable>{nullptr}.get());
+}
+
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
+{
+	BOOST_CHECK(false == (bool)uniform_ptr<int>{});
+	BOOST_CHECK(false == uniform_ptr<int>{});
+	BOOST_CHECK(!uniform_ptr<int>{});
+	BOOST_CHECK(false == (bool)uniform_ptr<char>{nullptr});
+	BOOST_CHECK(true == (bool)uniform_ptr<bool>{false});
+	BOOST_CHECK(true == uniform_ptr<bool>{false});
+	BOOST_CHECK(uniform_ptr<bool>{false});
+	BOOST_CHECK(false == (bool)uniform_ptr<IntValue>{});
+	BOOST_CHECK(false == (bool)uniform_ptr<IntNonMovable>{});
+	BOOST_CHECK(false == (bool)uniform_ptr<IntNonCopyable>{nullptr});
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr)
