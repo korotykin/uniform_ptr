@@ -35,14 +35,16 @@ public:
 		static_assert(std::is_convertible_v<U*, T*>);
 	}
 
-	uniform_ptr(const uniform_ptr<T> & lhv) = delete;
+	// copy and move ctors
+	uniform_ptr(const uniform_ptr<T> & lhv) = delete; // delete <- because we use unique_ptr in implementation
 	uniform_ptr(uniform_ptr<T> && lhv) noexcept : mValue(std::move(lhv.mValue)) {}
 	uniform_ptr<T> & operator=(const uniform_ptr<T> & lhv) = delete;
 	uniform_ptr<T> & operator=(uniform_ptr<T> && lhv) noexcept
 	{
 		mValue = std::move(lhv.mValue);
 	}
-	~uniform_ptr() = default;
+
+	~uniform_ptr() = default; // non virtual <- inheritance is possible, but I don't see any reason to have 'pointer to pointer'
 public:
 	operator bool() const { return get() != nullptr; }
 	T & operator*()
