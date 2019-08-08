@@ -44,66 +44,66 @@ public:
 	}
 	~uniform_ptr() = default;
 public:
-	operator bool() const { return getPointer() != nullptr; }
+	operator bool() const { return get() != nullptr; }
 	T & operator*()
 	{
-		return *getPointer();
+		return *get();
 	}
 	const T & operator*() const
 	{
-		return *getPointer();
+		return *get();
 	}
 	T * operator->()
 	{
-		return getPointer();
+		return get();
 	}
 	const T * operator->() const
 	{
-		return getPointer();
+		return get();
+	}
+
+	T * get()
+	{
+		if (auto pval = std::get_if<nullptr_t>(&mValue))
+		{
+			return *pval;
+		}
+		else if (auto pval = std::get_if<T*>(&mValue))
+		{
+			return *pval;
+		}
+		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
+		{
+			return pval->get();
+		}
+		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
+		{
+			return pval->get();
+		};
+		throw std::logic_error("invalid type");
+	}
+	const T * get() const
+	{
+		if (auto pval = std::get_if<nullptr_t>(&mValue))
+		{
+			return *pval;
+		}
+		else if (auto pval = std::get_if<T*>(&mValue))
+		{
+			return *pval;
+		}
+		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
+		{
+			return pval->get();
+		}
+		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
+		{
+			return pval->get();
+		};
+		throw std::logic_error("invalid type");
 	}
 private:
 	std::variant<nullptr_t, T *, std::shared_ptr<T>, std::unique_ptr<T> > mValue;
-
-	T * getPointer()
-	{
-		if (auto pval = std::get_if<nullptr_t>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if<T*>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		}
-		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		};
-		throw std::logic_error("invalid type");
-	}
-	const T * getPointer() const
-	{
-		if (auto pval = std::get_if<nullptr_t>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if<T*>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		}
-		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		};
-		throw std::logic_error("invalid type");
-	}
 };
 
 #endif // !_UNIFORM_PTR_HPP_
