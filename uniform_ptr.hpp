@@ -2,110 +2,76 @@
 
 #ifndef _UNIFORM_PTR_HPP_
 
-#include <variant>
+#include <functional>
 #include <memory>
 #include <type_traits>
 
 template<typename T>
 class uniform_ptr {
 public:
-	uniform_ptr(nullptr_t = nullptr) : mValue(nullptr) {}
+	uniform_ptr(nullptr_t = nullptr) : mF([]() -> T* { return nullptr; }) {}
 
 	template<typename U = T, std::enable_if_t<std::is_copy_constructible_v<U>, int> = 0 >
-	uniform_ptr(const U & val) : mValue(std::unique_ptr<T>(std::make_unique<U>(val))) {}
+	uniform_ptr(const U & val) : mF([p = val]() mutable ->T* { return &p; }) {}
 
-	template<typename U = T, std::enable_if_t<std::is_move_constructible_v<U> && !std::is_reference_v<U>, int> = 0>
-	uniform_ptr(U && val) : mValue(std::unique_ptr<T>(std::make_unique<U>(std::forward<U>(val))))
+	template<typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*> && std::is_move_constructible_v<U> && !std::is_reference_v<U>, int> = 0>
+	uniform_ptr(U&& val) : mF([p = std::forward<U>(val)]() mutable ->T* { return &p; }
+	)
 	{
-		static_assert(std::is_convertible_v<U*, T*>);
 	}
 
 	template<typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
-	uniform_ptr(U * const val) : mValue(val) {}
+	uniform_ptr(U* const val) : mF([p = val]() -> T* {return p; }) {}
 
-	template <typename U = T>
-	uniform_ptr(std::shared_ptr<U> val) : mValue(val)
+	template <typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
+	uniform_ptr(std::shared_ptr<U> val) : mF([p = val]() -> T* { return p.get();  })
 	{
-		static_assert(std::is_convertible_v<U*, T*>);
 	}
 
-	template <typename U = T>
-	uniform_ptr(std::unique_ptr<U> val) : mValue(std::move(std::unique_ptr<T>(std::move(val))))
+	template <typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
+	uniform_ptr(std::unique_ptr<U> val) : mF(std::bind([](std::unique_ptr<U>& p) -> T* { return p.get(); }, std::move(val)))
 	{
-		static_assert(std::is_convertible_v<U*, T*>);
 	}
 
 	// copy and move ctors
-	uniform_ptr(const uniform_ptr<T> & lhv) = delete; // delete <- because we use unique_ptr in implementation
-	uniform_ptr(uniform_ptr<T> && lhv) noexcept : mValue(std::move(lhv.mValue)) {}
-	uniform_ptr<T> & operator=(const uniform_ptr<T> & lhv) = delete;
-	uniform_ptr<T> & operator=(uniform_ptr<T> && lhv) noexcept
+	uniform_ptr(const uniform_ptr<T>& lhv) = delete; // delete <- because we use unique_ptr in implementation
+	uniform_ptr(uniform_ptr<T>&& lhv) noexcept : mF(std::move(lhv.mF)) {}
+	uniform_ptr<T>& operator=(const uniform_ptr<T>& lhv) = delete;
+	uniform_ptr<T>& operator=(uniform_ptr<T>&& lhv) noexcept
 	{
-		mValue = std::move(lhv.mValue);
+		mF = std::move(lhv.mF);
 	}
 
 	~uniform_ptr() = default; // non virtual <- inheritance is possible, but I don't see any reason to have 'pointer to pointer'
 public:
 	operator bool() const { return get() != nullptr; }
-	T & operator*()
+	T& operator*()
 	{
 		return *get();
 	}
-	const T & operator*() const
+	const T& operator*() const
 	{
 		return *get();
 	}
-	T * operator->()
+	T* operator->()
 	{
 		return get();
 	}
-	const T * operator->() const
+	const T* operator->() const
 	{
 		return get();
 	}
 
-	T * get()
+	T* get()
 	{
-		if (auto pval = std::get_if<nullptr_t>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if<T*>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		}
-		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		};
-		throw std::logic_error("invalid type");
+		return mF();
 	}
-	const T * get() const
+	const T* get() const
 	{
-		if (auto pval = std::get_if<nullptr_t>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if<T*>(&mValue))
-		{
-			return *pval;
-		}
-		else if (auto pval = std::get_if < std::shared_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		}
-		else if (auto pval = std::get_if <std::unique_ptr<T>>(&mValue))
-		{
-			return pval->get();
-		};
-		throw std::logic_error("invalid type");
+		return mF();
 	}
 private:
-	std::variant<nullptr_t, T *, std::shared_ptr<T>, std::unique_ptr<T> > mValue;
+	std::function<T* ()> mF;
 };
 
 #endif // !_UNIFORM_PTR_HPP_
