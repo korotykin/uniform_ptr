@@ -8,11 +8,11 @@
 class Outputer
 {
 public:
-	Outputer & add_stream(uniform_ptr<std::ostream> && a_ostream);
+	Outputer & add_stream(akl::uniform_ptr<std::ostream> && a_ostream);
 	template <typename T>
 	Outputer & operator<<(const T & val);
 private:
-	std::vector<uniform_ptr<std::ostream> > m_ostrs;
+	std::vector<akl::uniform_ptr<std::ostream> > m_ostrs;
 };
 
 int main()
@@ -29,7 +29,7 @@ int main()
 	return 0;
 }
 
-Outputer & Outputer::add_stream(uniform_ptr<std::ostream> && a_ostream)
+Outputer & Outputer::add_stream(akl::uniform_ptr<std::ostream> && a_ostream)
 {
 	m_ostrs.emplace_back(std::move(a_ostream));
 	return *this;

@@ -6,6 +6,8 @@
 #include <memory>
 #include <type_traits>
 
+namespace akl {
+
 template<typename T>
 class uniform_ptr {
 public:
@@ -66,5 +68,7 @@ public:
 private:
 	std::function<T*(void)> mF;
 };
+
+}
 
 #endif // !_UNIFORM_PTR_HPP_
