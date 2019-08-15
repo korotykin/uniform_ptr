@@ -12,31 +12,24 @@ public:
 	uniform_ptr(nullptr_t = nullptr) : mF([]() -> T* { return nullptr; }) {}
 
 	template<typename U = T, std::enable_if_t<std::is_copy_constructible_v<U>, int> = 0 >
-	uniform_ptr(const U & val) : mF([p = val]() mutable ->T* { return &p; }) {}
+	uniform_ptr(const U & val) : mF([p = val]() mutable -> T* { return &p; }) {}
 
 	template<typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*> && std::is_move_constructible_v<U> && !std::is_reference_v<U>, int> = 0>
-	uniform_ptr(U&& val) : mF([p = std::forward<U>(val)]() mutable ->T* { return &p; }
-	)
-	{
-	}
+	uniform_ptr(U&& val) : mF([p = std::make_shared<U>(std::forward<U>(val))]() ->T* { return p.get(); }) {}
 
 	template<typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
-	uniform_ptr(U* const val) : mF([p = val]() -> T* {return p; }) {}
+	uniform_ptr(U* const val) : mF([p = val]() -> T* { return p; }) {}
 
 	template <typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
-	uniform_ptr(std::shared_ptr<U> val) : mF([p = val]() -> T* { return p.get();  })
-	{
-	}
+	uniform_ptr(std::shared_ptr<U> val) : mF([p = val]() -> T* { return p.get(); }) {}
 
 	template <typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*>, int> = 0>
-	uniform_ptr(std::unique_ptr<U> val) : mF(std::bind([](std::unique_ptr<U>& p) -> T* { return p.get(); }, std::move(val)))
-	{
-	}
+	uniform_ptr(std::unique_ptr<U> val) : mF([p = std::shared_ptr(std::move(val))]() -> T* { return p.get(); }) {}
 
 	// copy and move ctors
-	uniform_ptr(const uniform_ptr<T>& lhv) = delete; // delete <- because we use unique_ptr in implementation
+	uniform_ptr(const uniform_ptr<T>& lhv) = default;
 	uniform_ptr(uniform_ptr<T>&& lhv) noexcept : mF(std::move(lhv.mF)) {}
-	uniform_ptr<T>& operator=(const uniform_ptr<T>& lhv) = delete;
+	uniform_ptr<T>& operator=(const uniform_ptr<T>& lhv) = default;
 	uniform_ptr<T>& operator=(uniform_ptr<T>&& lhv) noexcept
 	{
 		mF = std::move(lhv.mF);
@@ -71,7 +64,7 @@ public:
 		return mF();
 	}
 private:
-	std::function<T* ()> mF;
+	std::function<T*(void)> mF;
 };
 
 #endif // !_UNIFORM_PTR_HPP_
