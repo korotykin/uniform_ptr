@@ -77,6 +77,8 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_ctor)
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
 {
 	BOOST_CHECK(1 == *akl::uniform_ptr<int>{1}); // value is moved
+	BOOST_CHECK('A' == *akl::uniform_ptr<char>{'A'});
+	BOOST_CHECK(false == *akl::uniform_ptr<bool>{false});
 
 	// checking with objects
 	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);
