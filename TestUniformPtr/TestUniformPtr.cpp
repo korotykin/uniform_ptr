@@ -106,6 +106,11 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_shared_ptr)
 	BOOST_CHECK(*val == *ptr);
 }
 
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_unique_ptr)
+{
+	BOOST_CHECK(5 == *akl::uniform_ptr<int>(std::make_unique<int>(5)));
+}
+
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
 {
 	BOOST_CHECK(false == (bool)akl::uniform_ptr<int>{});
