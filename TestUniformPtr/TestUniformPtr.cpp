@@ -10,7 +10,7 @@
 class IntValue {
 public:
 	virtual ~IntValue() {}
-	virtual int get() const = 0;
+	virtual int getInt() const = 0;
 };
 
 // Copy ctor disabled. Move ctor enabled
@@ -24,7 +24,7 @@ public:
 	IntNonCopyable & operator=(IntNonCopyable &&) = default;
 	~IntNonCopyable() = default;
 
-	int get() const override { return m_value; }
+	int getInt() const override { return m_value; }
 private:
 	int m_value = 0;
 };
@@ -40,7 +40,7 @@ public:
 	IntNonMovable & operator=(IntNonMovable &&) = delete;
 	~IntNonMovable() = default;
 
-	int get() const override { return m_value; }
+	int getInt() const override { return m_value; }
 private:
 	int m_value = 0;
 };
@@ -70,8 +70,18 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_ctor)
 	const long long V = 3;
 	BOOST_CHECK(V == *akl::uniform_ptr<long long>{V});
 	static_assert(!std::is_move_constructible_v<IntNonMovable>);
-	BOOST_CHECK(4 == akl::uniform_ptr<IntNonMovable>(IntNonMovable(4))->get()); // copying value
-	BOOST_CHECK(6 == akl::uniform_ptr<IntValue>{IntNonMovable{ 6 }}->get());
+	BOOST_CHECK(4 == akl::uniform_ptr<IntNonMovable>(IntNonMovable(4))->getInt()); // copying value
+	BOOST_CHECK(6 == akl::uniform_ptr<IntValue>{IntNonMovable{ 6 }}->getInt());
+}
+
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
+{
+	BOOST_CHECK(1 == *akl::uniform_ptr<int>{1}); // value is moved
+
+	// checking with objects
+	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);
+	BOOST_CHECK(7 == akl::uniform_ptr<IntNonCopyable>(IntNonCopyable(7))->getInt()); // moving value
+	BOOST_CHECK(5 == akl::uniform_ptr<IntValue>(IntNonCopyable(5))->getInt()); // copying child value
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
@@ -91,7 +101,6 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
 BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 {
 	// checking with POD type = int
-	BOOST_CHECK(1 == *akl::uniform_ptr<int>{1}); // value is moved
 	int b = 2;
 	BOOST_CHECK(2 == *akl::uniform_ptr<int>{b}); // value is copyed
 	BOOST_CHECK(2 == *akl::uniform_ptr<int>{&b}); // saving a pointer to value
@@ -100,8 +109,4 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 	//BOOST_CHECK(3 == *akl::uniform_ptr<int>{&c}); // is not compiled - const int != int
 	BOOST_CHECK(3 == *akl::uniform_ptr<const int>{ c });
 
-	// checking with objects
-	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);
-	BOOST_CHECK(7 == akl::uniform_ptr<IntNonCopyable>(IntNonCopyable(7))->get()); // moving value
-	BOOST_CHECK(5 == akl::uniform_ptr<IntValue>(IntNonCopyable(5))->get()); // copying child value
 }
