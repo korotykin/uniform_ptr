@@ -69,6 +69,9 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_ctor)
 	BOOST_CHECK(*akl::uniform_ptr<bool>{T});
 	const long long V = 3;
 	BOOST_CHECK(V == *akl::uniform_ptr<long long>{V});
+	static_assert(!std::is_move_constructible_v<IntNonMovable>);
+	BOOST_CHECK(4 == akl::uniform_ptr<IntNonMovable>(IntNonMovable(4))->get()); // copying value
+	BOOST_CHECK(6 == akl::uniform_ptr<IntValue>{IntNonMovable{ 6 }}->get());
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
@@ -98,9 +101,6 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr)
 	BOOST_CHECK(3 == *akl::uniform_ptr<const int>{ c });
 
 	// checking with objects
-	static_assert(!std::is_move_constructible_v<IntNonMovable>);
-	BOOST_CHECK(4 == akl::uniform_ptr<IntNonMovable>(IntNonMovable(4))->get()); // copying value
-	BOOST_CHECK(6 == akl::uniform_ptr<IntValue>{IntNonMovable{ 6 }}->get());
 	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);
 	BOOST_CHECK(7 == akl::uniform_ptr<IntNonCopyable>(IntNonCopyable(7))->get()); // moving value
 	BOOST_CHECK(5 == akl::uniform_ptr<IntValue>(IntNonCopyable(5))->get()); // copying child value
