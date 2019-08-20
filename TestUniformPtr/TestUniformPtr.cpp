@@ -90,6 +90,10 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_pointer)
 {
 	int valInt = 6;
 	BOOST_CHECK(valInt == *akl::uniform_ptr<decltype(valInt)>{&valInt});
+	akl::uniform_ptr<decltype(valInt)> ptrValInt{ &valInt };
+	BOOST_CHECK(valInt == *ptrValInt);
+	++valInt;
+	BOOST_CHECK(valInt == *ptrValInt);
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
