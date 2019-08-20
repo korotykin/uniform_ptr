@@ -86,6 +86,12 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
 	BOOST_CHECK(5 == akl::uniform_ptr<IntValue>(IntNonCopyable(5))->getInt()); // copying child value
 }
 
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_pointer)
+{
+	int valInt = 6;
+	BOOST_CHECK(valInt == *akl::uniform_ptr<decltype(valInt)>{&valInt});
+}
+
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
 {
 	BOOST_CHECK(false == (bool)akl::uniform_ptr<int>{});
