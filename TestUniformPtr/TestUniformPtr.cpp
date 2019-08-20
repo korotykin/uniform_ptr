@@ -96,6 +96,16 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_pointer)
 	BOOST_CHECK(valInt == *ptrValInt);
 }
 
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_shared_ptr)
+{
+	std::shared_ptr<int> val = std::make_shared<int>(6);
+	BOOST_CHECK(*val == *akl::uniform_ptr<int>(val));
+	akl::uniform_ptr<int> ptr{ val };
+	BOOST_CHECK(*val == *ptr);
+	++*val;
+	BOOST_CHECK(*val == *ptr);
+}
+
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
 {
 	BOOST_CHECK(false == (bool)akl::uniform_ptr<int>{});
