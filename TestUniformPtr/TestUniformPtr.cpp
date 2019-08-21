@@ -124,11 +124,34 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_pointer)
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_shared_ptr)
 {
 	std::shared_ptr<int> val = std::make_shared<int>(6);
-	BOOST_CHECK(*val == *akl::uniform_ptr<int>(val));
+	BOOST_CHECK(6 == *akl::uniform_ptr<int>(val));
 	akl::uniform_ptr<int> ptr{ val };
-	BOOST_CHECK(*val == *ptr);
-	++*val;
-	BOOST_CHECK(*val == *ptr);
+	BOOST_CHECK(6 == *ptr);
+	*val = 9;
+	BOOST_CHECK(9 == *val);
+	BOOST_CHECK(9 == *ptr);
+
+	std::shared_ptr<IntNonCopyable> p1ObjInt1 = std::make_shared<IntNonCopyable>(1);
+	BOOST_CHECK(1 == p1ObjInt1->getInt()); // check if value created and assigned
+	akl::uniform_ptr<IntNonCopyable> p2ObjInt1{ p1ObjInt1 }; // create 2nd pointer to value
+	BOOST_CHECK(1 == p2ObjInt1->getInt()); // check if 2nd pointer created
+	akl::uniform_ptr<IntValue> p3ObjInt1{ p1ObjInt1 }; // create a pointer to value as pointer to parent class
+	BOOST_CHECK(1 == p3ObjInt1->getInt()); // check if pointer created
+	p1ObjInt1->setInt(2); // set new value
+	BOOST_CHECK(2 == p1ObjInt1->getInt()); // check if value changed
+	BOOST_CHECK(2 == p2ObjInt1->getInt());
+	BOOST_CHECK(2 == p3ObjInt1->getInt());
+
+	std::shared_ptr<IntNonMovable> p1ObjInt2 = std::make_shared<IntNonMovable>(3);
+	BOOST_CHECK(3 == p1ObjInt2->getInt()); // check if value created
+	akl::uniform_ptr<IntNonMovable> p2ObjInt2{ p1ObjInt2 }; // create uniform pointer to value
+	BOOST_CHECK(3 == p2ObjInt2->getInt()); // check if 2nd pointer created
+	akl::uniform_ptr<IntValue> p3ObjInt2{ p1ObjInt2 }; // create a pointer to value as pointer to parent class
+	BOOST_CHECK(3 == p3ObjInt2->getInt()); // check if pointer created
+	p1ObjInt2->setInt(4); // set new value
+	BOOST_CHECK(4 == p1ObjInt2->getInt()); // check if value changed
+	BOOST_CHECK(4 == p2ObjInt2->getInt());
+	BOOST_CHECK(4 == p3ObjInt2->getInt());
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_unique_ptr)
