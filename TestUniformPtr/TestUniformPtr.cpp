@@ -11,6 +11,7 @@ class IntValue {
 public:
 	virtual ~IntValue() {}
 	virtual int getInt() const = 0;
+	virtual void setInt(int val) = 0;
 };
 
 // Copy ctor disabled. Move ctor enabled
@@ -25,6 +26,7 @@ public:
 	~IntNonCopyable() = default;
 
 	int getInt() const override { return m_value; }
+	void setInt(int val) override { m_value = val; }
 private:
 	int m_value = 0;
 };
@@ -41,6 +43,7 @@ public:
 	~IntNonMovable() = default;
 
 	int getInt() const override { return m_value; }
+	void setInt(int val) override { m_value = val; }
 private:
 	int m_value = 0;
 };
@@ -89,11 +92,33 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_pointer)
 {
 	int valInt = 6;
-	BOOST_CHECK(valInt == *akl::uniform_ptr<decltype(valInt)>{&valInt});
-	akl::uniform_ptr<decltype(valInt)> ptrValInt{ &valInt };
-	BOOST_CHECK(valInt == *ptrValInt);
+	BOOST_CHECK(valInt == *akl::uniform_ptr<int>{&valInt});
+	akl::uniform_ptr<int> ptrValInt{ &valInt };
+	BOOST_CHECK(6 == *ptrValInt);
 	++valInt;
-	BOOST_CHECK(valInt == *ptrValInt);
+	BOOST_CHECK(7 == *ptrValInt);
+
+	IntNonCopyable objInt1{ 1 };
+	BOOST_CHECK(1 == objInt1.getInt()); // check if value created
+	akl::uniform_ptr<IntNonCopyable> p1ObjInt1{ &objInt1 }; // create 1st pointer to value
+	BOOST_CHECK(1 == p1ObjInt1->getInt()); // check if 1st pointer created
+	akl::uniform_ptr<IntValue> p2ObjInt1{ &objInt1 }; // create a pointer to value as pointer to parent class
+	BOOST_CHECK(1 == p2ObjInt1->getInt()); // check if pointer created
+	objInt1.setInt(2); // set new value
+	BOOST_CHECK(2 == objInt1.getInt()); // check if value changed
+	BOOST_CHECK(2 == p1ObjInt1->getInt());
+	BOOST_CHECK(2 == p2ObjInt1->getInt());
+
+	IntNonMovable objInt2{ 3 };
+	BOOST_CHECK(3 == objInt2.getInt()); // check if value created
+	akl::uniform_ptr<IntNonMovable> p1ObjInt2{ &objInt2 }; // create 1st pointer to value
+	BOOST_CHECK(3 == p1ObjInt2->getInt()); // check if 1st pointer created
+	akl::uniform_ptr<IntValue> p2ObjInt2{ &objInt2 }; // create a pointer to value as pointer to parent class
+	BOOST_CHECK(3 == p2ObjInt2->getInt()); // check if pointer created
+	objInt2.setInt(4); // set new value
+	BOOST_CHECK(4 == objInt2.getInt()); // check if value changed
+	BOOST_CHECK(4 == p1ObjInt2->getInt());
+	BOOST_CHECK(4 == p2ObjInt2->getInt());
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_shared_ptr)
