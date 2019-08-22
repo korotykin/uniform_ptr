@@ -157,6 +157,12 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_shared_ptr)
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_unique_ptr)
 {
 	BOOST_CHECK(5 == *akl::uniform_ptr<int>(std::make_unique<int>(5)));
+	BOOST_CHECK(6 == akl::uniform_ptr<IntNonCopyable>(std::make_unique<IntNonCopyable>(6))->getInt());
+	BOOST_CHECK(7 == akl::uniform_ptr<IntValue>(std::make_unique<IntNonCopyable>(7))->getInt());
+	BOOST_CHECK(8 == akl::uniform_ptr<IntValue>(std::unique_ptr<IntValue>(new IntNonCopyable{ 8 }))->getInt());
+	BOOST_CHECK(9 == akl::uniform_ptr<IntNonMovable>(std::make_unique<IntNonMovable>(9))->getInt());
+	BOOST_CHECK(10 == akl::uniform_ptr<IntValue>(std::make_unique<IntNonMovable>(10))->getInt());
+	BOOST_CHECK(11 == akl::uniform_ptr<IntValue>(std::unique_ptr<IntValue>(new IntNonMovable{ 11 }))->getInt());
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
