@@ -30,12 +30,12 @@ public:
 	uniform_ptr(std::unique_ptr<U> val) : mF([p = std::shared_ptr(std::move(val))]() -> T* { return p.get(); }) {}
 
 	// copy and move ctors
-	uniform_ptr(const uniform_ptr<T>& lhv) = default;
-	uniform_ptr(uniform_ptr<T>&& lhv) noexcept : mF(std::move(lhv.mF)) {}
-	uniform_ptr<T>& operator=(const uniform_ptr<T>& lhv) = default;
-	uniform_ptr<T>& operator=(uniform_ptr<T>&& lhv) noexcept
+	uniform_ptr(const uniform_ptr<T>& rhv) = default;
+	uniform_ptr(uniform_ptr<T>&& rhv) noexcept : mF(std::move(rhv.mF)) {}
+	uniform_ptr<T>& operator=(const uniform_ptr<T>& rhv) = default;
+	uniform_ptr<T>& operator=(uniform_ptr<T>&& rhv) noexcept
 	{
-		mF = std::move(lhv.mF);
+		mF = std::move(rhv.mF);
 	}
 
 	~uniform_ptr() = default; // non virtual <- inheritance is possible, but I don't see any reason to have 'pointer to pointer'
