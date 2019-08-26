@@ -13,8 +13,9 @@ class uniform_ptr {
 public:
 	uniform_ptr(nullptr_t = nullptr) : mF([]() -> T* { return nullptr; }) {}
 
+	// makes a copy of original value
 	template<typename U = T, std::enable_if_t<std::is_copy_constructible_v<U>, int> = 0 >
-	uniform_ptr(const U & val) : mF([p = val]() mutable -> T* { return &p; }) {}
+	uniform_ptr(const U & val) : mF([p = std::make_shared<U>(val)]()  -> T* { return p.get(); }) {}
 
 	template<typename U = T, std::enable_if_t<std::is_convertible_v<U*, T*> && std::is_move_constructible_v<U> && !std::is_reference_v<U>, int> = 0>
 	uniform_ptr(U&& val) : mF([p = std::make_shared<U>(std::forward<U>(val))]() ->T* { return p.get(); }) {}
