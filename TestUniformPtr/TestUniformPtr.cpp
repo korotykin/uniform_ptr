@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_assign_op)
 	akl::uniform_ptr<int> p1{ 31 };
 	p1 = p0;
 	BOOST_CHECK_EQUAL(p1.get(), p0.get());
-	BOOST_CHECK_EQUAL(false, (bool)p0);
+	BOOST_CHECK_EQUAL(false, (bool)p1);
 
 	akl::uniform_ptr<int> p2{ 32 }; // take value by moving
 	akl::uniform_ptr<int> p3{ 33 };
@@ -281,6 +281,47 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_assign_op)
 	BOOST_CHECK_EQUAL(41, *p11);
 	*p10 = 42;
 	BOOST_CHECK_EQUAL(42, *p11);
+}
+
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_assign_op)
+{
+	akl::uniform_ptr<int> p0;
+	akl::uniform_ptr<int> p1{ 43 };
+	p1 = std::move(p0);
+	BOOST_CHECK_EQUAL(nullptr, p1.get());
+	BOOST_CHECK_EQUAL(false, (bool)p1);
+
+	akl::uniform_ptr<int> p2{ 44 }; // take value by moving
+	akl::uniform_ptr<int> p3;
+	p3 = std::move(p2);
+	BOOST_CHECK((bool)p3);
+	BOOST_CHECK_EQUAL(44, *p3);
+
+	int i1 = 45;
+	akl::uniform_ptr<int> p4{ i1 }; // take value by copying
+	akl::uniform_ptr<int> p5;
+	p5 = std::move(p4);
+	BOOST_CHECK((bool)p5);
+	BOOST_CHECK_EQUAL(45, *p5);
+
+	int i2 = 46;
+	akl::uniform_ptr<int> p6{ &i2 }; // take pointer to value
+	akl::uniform_ptr<int> p7;
+	p7 = std::move(p6);
+	BOOST_CHECK((bool)p7);
+	BOOST_CHECK_EQUAL(46, *p7);
+
+	akl::uniform_ptr<int> p8{ std::make_shared<int>(47) };
+	akl::uniform_ptr<int> p9;
+	p9 = std::move(p8);
+	BOOST_CHECK((bool)p9);
+	BOOST_CHECK_EQUAL(47, *p9);
+
+	akl::uniform_ptr<int> p10{ std::make_unique<int>(48) };
+	akl::uniform_ptr<int> p11;
+	p11 = std::move(p10);
+	BOOST_CHECK((bool)p11);
+	BOOST_CHECK_EQUAL(48, *p11);
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)

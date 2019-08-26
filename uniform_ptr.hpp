@@ -36,6 +36,7 @@ public:
 	uniform_ptr<T>& operator=(uniform_ptr<T>&& rhv) noexcept
 	{
 		mF = std::move(rhv.mF);
+		return *this;
 	}
 
 	~uniform_ptr() = default; // non virtual <- inheritance is possible, but I don't see any reason to have 'pointer to pointer'
