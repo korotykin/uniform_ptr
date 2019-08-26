@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_nullptr_ctor)
 	BOOST_CHECK(nullptr == akl::uniform_ptr<IntNonCopyable>{nullptr}.get());
 }
 
-BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_ctor)
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_value_ctor)
 {
 	const char A = 'A'; // it disallows using move ctor
 	BOOST_CHECK(A == *akl::uniform_ptr<char>{A});
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_ctor)
 	BOOST_CHECK(6 == akl::uniform_ptr<IntValue>{IntNonMovable{ 6 }}->getInt());
 }
 
-BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_value_ctor)
 {
 	BOOST_CHECK(1 == *akl::uniform_ptr<int>{1}); // value is moved
 	BOOST_CHECK('A' == *akl::uniform_ptr<char>{'A'});
@@ -207,6 +207,30 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_ctor)
 	BOOST_CHECK_EQUAL(21, *p11);
 	*p10 = 22;
 	BOOST_CHECK_EQUAL(22, *p11);
+}
+
+
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
+{
+	BOOST_CHECK_EQUAL(nullptr, akl::uniform_ptr<int>{ akl::uniform_ptr<int>{} }.get());
+	BOOST_CHECK_EQUAL(false, (bool)akl::uniform_ptr<int>{ akl::uniform_ptr<int>{} });
+
+	BOOST_CHECK_EQUAL(true, (bool)akl::uniform_ptr<int>{ akl::uniform_ptr<int>{23} });
+	BOOST_CHECK_EQUAL(24, *akl::uniform_ptr<int>{ akl::uniform_ptr<int>{24} });
+
+	int i1 = 25;
+	BOOST_CHECK_EQUAL(true, (bool)akl::uniform_ptr<int>{ akl::uniform_ptr<int>{i1} });
+	BOOST_CHECK_EQUAL(25, *akl::uniform_ptr<int>{ akl::uniform_ptr<int>{i1} });
+
+	int i2 = 26;
+	BOOST_CHECK_EQUAL(true, (bool)akl::uniform_ptr<int>{akl::uniform_ptr<int>{&i2}});
+	BOOST_CHECK_EQUAL(26, *akl::uniform_ptr<int>{akl::uniform_ptr<int>{&i2}});
+
+	BOOST_CHECK_EQUAL(true, (bool)akl::uniform_ptr<int>{akl::uniform_ptr<int>{std::make_shared<int>(27)}});
+	BOOST_CHECK_EQUAL(28, *akl::uniform_ptr<int>{akl::uniform_ptr<int>{std::make_shared<int>(28)}});
+
+	BOOST_CHECK_EQUAL(true, (bool)akl::uniform_ptr<int>{akl::uniform_ptr<int>{std::make_unique<int>(29)}});
+	BOOST_CHECK_EQUAL(30, *akl::uniform_ptr<int>{akl::uniform_ptr<int>{std::make_unique<int>(30)}});
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
