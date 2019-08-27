@@ -6,7 +6,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace akl {
+namespace akt {
 
 template<typename T>
 class uniform_ptr {
