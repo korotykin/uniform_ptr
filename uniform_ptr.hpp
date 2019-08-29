@@ -39,6 +39,9 @@ public:
 		return *this;
 	}
 
+	template<typename U, std::enable_if_t<!std::is_same_v<U, T> && std::is_convertible_v<U*, T*>, int> = 0>
+	uniform_ptr(const uniform_ptr<U>& rhv) : mF([p = rhv]() mutable -> T* {return p.get(); }) {}
+
 	~uniform_ptr() = default; // non virtual <- inheritance is possible, but I don't see any reason to have 'pointer to pointer'
 public:
 	operator bool() const { return get() != nullptr; }
