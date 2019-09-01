@@ -596,6 +596,12 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_assign_op)
 		p2 = p1;
 		BOOST_CHECK_EQUAL(p1.get(), p2.get());
 	}
+
+	{
+		akt::uniform_ptr<int> p1{ 20 };
+		p1 = p1;
+		BOOST_CHECK_EQUAL(20, *p1);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_assign_op)
@@ -766,6 +772,12 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_assign_op)
 		akt::uniform_ptr<IntNonMovable> p2;
 		p2 = std::move(p1);
 		BOOST_CHECK_EQUAL(19, p2->getInt());
+	}
+
+	{
+		akt::uniform_ptr<int> p1{ 20 };
+		p1 = std::move(p1);
+		BOOST_CHECK_EQUAL(20, *p1);
 	}
 }
 

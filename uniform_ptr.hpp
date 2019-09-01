@@ -35,7 +35,10 @@ public:
 	uniform_ptr<T>& operator=(const uniform_ptr<T>& rhv) = default;
 	uniform_ptr<T>& operator=(uniform_ptr<T>&& rhv) noexcept
 	{
-		mF = std::move(rhv.mF);
+		if (this != &rhv)
+		{
+			mF = std::move(rhv.mF);
+		}
 		return *this;
 	}
 
