@@ -410,7 +410,6 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor)
 	BOOST_CHECK_EQUAL(19, akt::uniform_ptr<IntNonMovable>{ akt::uniform_ptr<IntNonMovable>{ std::make_unique<IntNonMovable>(19) } }->getInt());
 }
 
-
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_assign_op)
 {
 	akt::uniform_ptr<int> p0;
@@ -835,7 +834,6 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_ctor_from_inherit)
 	}
 }
 
-
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor_from_inherit)
 {
 	BOOST_CHECK_EQUAL(false, (bool)akt::uniform_ptr<IntValue>{ akt::uniform_ptr<IntNonCopyable>{} });
@@ -863,6 +861,156 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_ctor_from_inherit)
 	BOOST_CHECK_EQUAL(19, akt::uniform_ptr<IntValue>{ akt::uniform_ptr<IntNonCopyable>{ std::make_unique<IntNonCopyable>(19) } }->getInt());
 
 	BOOST_CHECK_EQUAL(19, akt::uniform_ptr<IntValue>{ akt::uniform_ptr<IntNonMovable>{ std::make_unique<IntNonMovable>(19) } }->getInt());
+}
+
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_copy_assign_op_from_inherit)
+{
+	{
+		akt::uniform_ptr<IntNonCopyable> p1;
+		akt::uniform_ptr<IntValue> p2{ IntNonCopyable{20} };
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1;
+		akt::uniform_ptr<IntValue> p2{ IntNonMovable{21} };
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonCopyable> p1{ IntNonCopyable{24} };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1{ IntNonMovable{24} };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		IntNonCopyable i{ 25 };
+		akt::uniform_ptr<IntNonCopyable> p1{ &i };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		IntNonMovable i{ 25 };
+		akt::uniform_ptr<IntNonMovable> p1{ &i };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonCopyable> p1{ std::make_shared<IntNonCopyable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1{ std::make_shared<IntNonMovable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonCopyable> p1{ std::make_unique<IntNonCopyable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1{ std::make_unique<IntNonMovable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = p1;
+		BOOST_CHECK_EQUAL(p1.get(), p2.get());
+	}
+}
+
+BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_assign_op_from_inherit)
+{
+	{
+		akt::uniform_ptr<IntNonCopyable> p1;
+		akt::uniform_ptr<IntValue> p2{ IntNonCopyable{20} };
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(false, (bool)p2);
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1;
+		akt::uniform_ptr<IntValue> p2{ IntNonMovable{21} };
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(false, (bool)p2);
+	}
+
+	{
+		akt::uniform_ptr<IntNonCopyable> p1{ IntNonCopyable{24} };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(24, p2->getInt());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1{ IntNonMovable{24} };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(24, p2->getInt());
+	}
+
+	{
+		IntNonCopyable i{ 25 };
+		akt::uniform_ptr<IntNonCopyable> p1{ &i };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(&i, p2.get());
+	}
+
+	{
+		IntNonMovable i{ 25 };
+		akt::uniform_ptr<IntNonMovable> p1{ &i };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(&i, p2.get());
+	}
+
+	{
+		akt::uniform_ptr<IntNonCopyable> p1{ std::make_shared<IntNonCopyable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(19, p2->getInt());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1{ std::make_shared<IntNonMovable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(19, p2->getInt());
+	}
+
+	{
+		akt::uniform_ptr<IntNonCopyable> p1{ std::make_unique<IntNonCopyable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(19, p2->getInt());
+	}
+
+	{
+		akt::uniform_ptr<IntNonMovable> p1{ std::make_unique<IntNonMovable>(19) };
+		akt::uniform_ptr<IntValue> p2;
+		p2 = std::move(p1);
+		BOOST_CHECK_EQUAL(19, p2->getInt());
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
