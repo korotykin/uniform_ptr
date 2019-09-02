@@ -1039,15 +1039,3 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_bool_cast)
 	BOOST_CHECK(false == (bool)akt::uniform_ptr<IntNonCopyable>{nullptr});
 }
 
-BOOST_AUTO_TEST_CASE(test_uniform_ptr)
-{
-	// checking with POD type = int
-	int b = 2;
-	BOOST_CHECK(2 == *akt::uniform_ptr<int>{b}); // value is copyed
-	BOOST_CHECK(2 == *akt::uniform_ptr<int>{&b}); // saving a pointer to value
-	const int c = 3;
-	BOOST_CHECK(3 == *akt::uniform_ptr<int>{c}); // ok cause the value is copyed
-	//BOOST_CHECK(3 == *akt::uniform_ptr<int>{&c}); // is not compiled - const int != int
-	BOOST_CHECK(3 == *akt::uniform_ptr<const int>{ c });
-
-}
