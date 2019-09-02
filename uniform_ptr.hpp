@@ -65,28 +65,16 @@ public:
 	~uniform_ptr() = default; // non virtual <- inheritance is possible, but I don't see any reason to have 'pointer to pointer'
 public:
 	operator bool() const { return get() != nullptr; }
-	T& operator*()
+	T& operator*() const
 	{
 		return *get();
 	}
-	const T& operator*() const
-	{
-		return *get();
-	}
-	T* operator->()
-	{
-		return get();
-	}
-	const T* operator->() const
+	T* operator->() const
 	{
 		return get();
 	}
 
-	T* get()
-	{
-		return mF();
-	}
-	const T* get() const
+	T* get() const
 	{
 		return mF();
 	}
