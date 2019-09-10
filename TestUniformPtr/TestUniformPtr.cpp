@@ -54,6 +54,11 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_default_ctor)
 	BOOST_CHECK(nullptr == akt::uniform_ptr<IntValue>{}.get());
 	BOOST_CHECK(nullptr == akt::uniform_ptr<IntNonMovable>{}.get());
 	BOOST_CHECK(nullptr == akt::uniform_ptr<IntNonCopyable>{}.get());
+	{
+		const akt::uniform_ptr<int> p;
+		BOOST_CHECK_EQUAL(nullptr, p.get());
+		BOOST_CHECK_EQUAL(false, (bool)p);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_nullptr_ctor)
@@ -62,19 +67,70 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_nullptr_ctor)
 	BOOST_CHECK(nullptr == akt::uniform_ptr<IntValue>{nullptr}.get());
 	BOOST_CHECK(nullptr == akt::uniform_ptr<IntNonMovable>{nullptr}.get());
 	BOOST_CHECK(nullptr == akt::uniform_ptr<IntNonCopyable>{nullptr}.get());
+	{
+		const akt::uniform_ptr<int> p{ nullptr };
+		BOOST_CHECK_EQUAL(nullptr, p.get());
+		BOOST_CHECK_EQUAL(false, (bool)p);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_const_ref_value_ctor)
 {
-	const char A = 'A'; // it disallows using move ctor
-	BOOST_CHECK(A == *akt::uniform_ptr<char>{A});
-	const bool T = true;
-	BOOST_CHECK(*akt::uniform_ptr<bool>{T});
-	const long long V = 3;
-	BOOST_CHECK(V == *akt::uniform_ptr<long long>{V});
+	{
+		const char A = 'A'; // it disallows using move ctor
+		BOOST_CHECK_EQUAL('A', *akt::uniform_ptr<char>{A});
+	}
+	{
+		const char A = 'A'; // it disallows using move ctor
+		BOOST_CHECK_EQUAL('A', *akt::uniform_ptr<const char>{A});
+	}
+	{
+		const bool T = true;
+		BOOST_CHECK_EQUAL(true, *akt::uniform_ptr<bool>{T});
+	}
+	{
+		const bool T = true;
+		BOOST_CHECK_EQUAL(true, *akt::uniform_ptr<const bool>{T});
+	}
+	{
+		const long long V = 3;
+		BOOST_CHECK_EQUAL(3LL, *akt::uniform_ptr<long long>{V});
+	}
+	{
+		const long long V = 3;
+		BOOST_CHECK_EQUAL(3LL, *akt::uniform_ptr<const long long>{V});
+	}
 	static_assert(!std::is_move_constructible_v<IntNonMovable>);
 	BOOST_CHECK(4 == akt::uniform_ptr<IntNonMovable>(IntNonMovable(4))->getInt()); // copying value
+	BOOST_CHECK(4 == akt::uniform_ptr<const IntNonMovable>(IntNonMovable(4))->getInt());
 	BOOST_CHECK(6 == akt::uniform_ptr<IntValue>{IntNonMovable{ 6 }}->getInt());
+	BOOST_CHECK(6 == akt::uniform_ptr<const IntValue>{IntNonMovable{ 6 }}->getInt());
+	{
+		const char A = 'A';
+		const akt::uniform_ptr<char> p{ A };
+		BOOST_CHECK_EQUAL('A', *p);
+		*p = 'B';
+		BOOST_CHECK_EQUAL('B', *p);
+	}
+	{
+		const char A = 'A';
+		const akt::uniform_ptr<const char> p{ A };
+		BOOST_CHECK_EQUAL('A', *p);
+		static_assert(std::is_const<std::remove_reference_t<decltype(*p)>>::value, "*p is constant"); // check that *p is reference to const
+		static_assert(std::is_same<decltype(*p), const char&>::value, "*p is 'const char&'"); // this line is not mandatory
+		static_assert(!std::is_assignable<decltype(*p), char>::value, "*p is not assignable"); //check that *p = 'B' rises compilation error
+	}
+	{
+		const akt::uniform_ptr<IntValue> p{ IntNonMovable{ 7 } };
+		BOOST_CHECK_EQUAL(7, p->getInt());
+		p->setInt(8);
+		BOOST_CHECK_EQUAL(8, p->getInt());
+	}
+	{
+		const akt::uniform_ptr<const IntValue> p{ IntNonMovable{ 7 } };
+		BOOST_CHECK_EQUAL(7, p->getInt());
+		static_assert(std::is_const<std::remove_reference_t<decltype(*p)>>::value, "*p is constant"); //check if *p is const
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_value_ctor)
@@ -87,6 +143,10 @@ BOOST_AUTO_TEST_CASE(test_uniform_ptr_move_value_ctor)
 	static_assert(!std::is_copy_constructible_v<IntNonCopyable>);
 	BOOST_CHECK(7 == akt::uniform_ptr<IntNonCopyable>(IntNonCopyable(7))->getInt()); // moving value
 	BOOST_CHECK(5 == akt::uniform_ptr<IntValue>(IntNonCopyable(5))->getInt()); // copying child value
+	{
+		const akt::uniform_ptr<IntValue> p{ IntNonCopyable{8} };
+		BOOST_CHECK_EQUAL(8, p->getInt());
+	}
 }
 
 BOOST_AUTO_TEST_CASE(test_uniform_ptr_ctor_from_pointer)
